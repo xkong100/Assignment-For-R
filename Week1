@@ -1,0 +1,40 @@
+Xiaomeng Kong
+Assignment 1
+
+1. Write a loop that calculates 12 factorial.
+ i <-1
+ fact <- 1
+ max<-12
+ while (i <= max) 
+ {fact<- i * fact
+ 
+  i<- i+1
+ }
+ fact
+ 
+ The answer is [1] 479001600
+ 
+ 2. Show how to create a numeric vector that contains the sequence from 20 to 50 by 5.
+ seq(20,50,by=5)
+ [1] 20 25 30 35 40 45 50
+ 
+ 3.Show how to take a trio of input numbers a, b, and c and implement the quadratic equation.
+ quadratic_formula <- function(a, b, c) {
+  if((b^2)-(4*a*c) >= 0)
+  { 
+    x_1 <- ((-1*b)+sqrt((b^2)-(4*a*c)))/(2*a)
+    x_2 <- ((-1*b)-sqrt((b^2)-(4*a*c)))/(2*a)
+    quadratic <- c(x_1, x_2)
+    quadratic
+  }
+  else{
+    x_1 <-complex(real= (-1*b)/(2*a), imaginary = (abs(sqrt(b^2)-(4*a*c)))/(2*a))
+    x_2 <-complex(real= (-1*b)/(2*a), imaginary = -(abs(sqrt(b^2)-(4*a*c)))/(2*a))
+    complex_root <- c(x_1, x_2)
+    complex_root
+  }
+}
+> quadratic_formula(1,2,3)
+[1] -1+5i -1-5i
+> quadratic_formula(9,4,-1)
+[1]  0.1783946 -0.6228390
