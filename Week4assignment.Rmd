@@ -1,0 +1,25 @@
+---
+title: "UK gas analysis"
+output: github_document
+---
+
+load the UKgas data, which is included with the ggplot2 packages.
+```{r}
+#install.packages("ggplot2")
+require(ggplot2)
+gas <- read.csv("UKgas.csv", header=TRUE)
+head(gas)
+
+
+# Identify which variables in the gas dataset are numeric, and which
+# variables are categorical
+str(gas)
+```
+```{r}
+ggplot(gas,aes(y=UKgas, x=1)) + geom_boxplot()
+hist(gas$UKgas, main = "UKgas Histogram", xlab = "gas")
+ggplot(gas, aes(x= time, y= UKgas))+ geom_point()
+
+```
+
+By observing the graphs, we can conclude that the meadian of UKgas consumption is about 200. Most people would consume gas around 100 to 200. Our graph is skewed to the left that means the mean UKgas consumption is less than its median. From the plot graph, we can clearly conclude that people consume gas more and more as the time is more approaching to 21st century becasue the technology is improving year by year, people heavily rely on the transportation such as cars. 
