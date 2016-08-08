@@ -1,0 +1,88 @@
+---
+title: "Untitled"
+output: github_document
+---
+Firstly, we need to install the hflights data
+
+```{r}
+#install.packages("hflights")
+library(hflights)
+library(ggplot2)
+```
+To show the original data
+```{r}
+head(hflights)
+```
+convert numberical value to character for Day of Week that is easier to read
+```{r}
+hflights$DayOfWeek <- gsub(1, 'Monday', hflights$DayOfWeek)
+hflights$DayOfWeek <- gsub(2, 'Tuesday', hflights$DayOfWeek)
+hflights$DayOfWeek <- gsub(3, 'Wednesday', hflights$DayOfWeek)
+hflights$DayOfWeek <- gsub(4, 'Thursday', hflights$DayOfWeek)
+hflights$DayOfWeek <- gsub(5, 'Friday', hflights$DayOfWeek)
+hflights$DayOfWeek <- gsub(6, 'Saturday', hflights$DayOfWeek)
+hflights$DayOfWeek <- gsub(7, 'Sunday', hflights$DayOfWeek)
+```
+combines Date columns
+
+```{r}
+flight_date <- paste(hflights$Month, hflights$DayofMonth, hflights$Year, sep="/")
+
+hflights$Date <- flight_date
+hflights$Date <- as.Date(flight_date, "%m/%d/%Y")
+```
+Convert the columns into readable lable
+```{r}
+hflights$Cancelled <- factor(hflights$Cancelled, levels=c(1,0), labels=c('Yes','No'))
+hflights$Diverted <- factor(hflights$Diverted, levels=c(1,0), labels=c('Yes','No'))
+
+```
+I want to get rid of some columns that it is not useful for my analysis
+```{r}
+fdata <- subset(hflights, select=c(Date, DayOfWeek, UniqueCarrier, FlightNum, TailNum, TaxiIn, TaxiOut, Cancelled,Diverted, AirTime, ArrDelay, DepDelay, AirTime, Origin, Dest, Distance))
+```
+Show the new columns which I select. 
+```{r}
+head(fdata)
+```
+To find a speed for the airplane, we use miles/ minute as unit
+```{r}
+fdata <- cbind (fdata, speed = fdata$Distance / fdata$AirTime)
+```
+Now, lets do some analysis,
+
+Let's use histgram to see how the distribution of speed is.
+
+```{r}
+hist(fdata$speed)
+```
+
+Since the histgram of speed is skewed to the right, it means that mean speed is slightly greater than the median speed. it is approximately normal distribution.
+
+In addition, the most important I am looking at a flight is how late it is by day of week.
+```{r}
+qplot(DepDelay, data=fdata, geom='histogram', binwidth = 5, xlim =c(-50, 200), main='Departure Delays by Day of Week') + facet_wrap(~DayOfWeek)
+```
+When we book the flight ticket, we also want to see which airlines offer the most of flights because that may means the airlines are more reliable than others.
+```{r}
+ggplot(data=fdata) + geom_bar(aes(x=UniqueCarrier)) + ggtitle('Flights by Airline')
+```
+The bar graph shows that XE has most flights, CO is second, and WN is the third.
+
+To find out any patterns between DepDelay and Spped, we need to filter out all the data that are cancelled or diverted. Before we plot the graph, we can make assumption. we can assume that as the avgspeed is decreasing, the Departure delay is expected longer and longer. It may be a common sense but we do not know if our assumption is correct or not. We will see 
+```{r}
+analysis <- fdata[fdata$Cancelled=='No',]
+analysis <- analysis[analysis$Diverted=='No',]
+# aggregate dta for flightnumber and Distance to find the mean speed
+analysis_agg <- aggregate(analysis$speed~analysis$UniqueCarrier+analysis$FlightNum+analysis$Distance, analysis, FUN = mean)
+
+names(analysis_agg) <- c("UniqueCarrier", "FlightNum", "Distance", "AvgSpeed")
+
+analysis <- merge(analysis, analysis_agg, by = c("UniqueCarrier", "FlightNum", "Distance"))
+
+#plot the graph
+attach(analysis)
+plot(AvgSpeed, DepDelay)
+
+```
+As we see our scatter plot, Depature Delay and Average Speed may not be linear correlated strongly. it is more like a negative parabola shape. In this case, Average Speed may affect Depature Delay but it is not a main reason. It disproves our assumption.
